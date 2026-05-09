@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Zonnewijzer Pro v6</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zonnewijzer">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="icon-192.png">
+<!-- Preload kritieke bestanden parallel -->
+<link rel="preload" href="styles.css"  as="style">
+<link rel="preload" href="suncalc.js" as="script">
+<link rel="preload" href="app.js"     as="script">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+</style>
+</head>
+<body>
+<a href="#app" class="sr-only" style="position:absolute;left:-9999px;top:0;z-index:999;">Ga naar inhoud</a>
+<header id="gps-header" aria-label="GPS status">
+  <div class="gps-left">
+    <div id="gps-pulse" class="pulse blink"></div>
+    <div id="coords-display">GPS SYNC...</div>
+    <div id="accuracy-display">(&#177; --m)</div>
+  </div>
+  <div id="zone-display">ZONE: UTC --</div>
+</header>
+<div id="offline-banner" style="display:none;background:rgba(255,0,0,0.12);
+  border-bottom:1px solid #ff6b6b;padding:5px 12px;
+  font-size:0.6rem;color:#ff8080;font-family:'Courier New',monospace;
+  text-align:center;font-weight:bold;letter-spacing:1px;flex-shrink:0;">
+  &#9888; OFFLINE
+</div>
+<main id="app" aria-label="Zonnewijzer Pro">
+
+<div id="view-launcher" class="view" role="region" aria-label="Paginamenu">
+  <div class="launcher-title" id="lbl-all-pages">Alle pagina's</div>
+  <div class="launcher-grid" id="launcher-grid"></div>
+  <div class="fav-edit-hint" id="lbl-fav-hint">Tik lang op een tegel om toe te voegen aan favorieten</div>
+</div>
+
+<div id="view-home" class="view active">
+  <div id="arc-wrap"><canvas id="arc-canvas"></canvas><div id="arc-time-label"></div></div>
+  <div id="arc-legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#4488ff;"></div><span id="lbl-golden">Golden Hour</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ff3333;"></div><span id="lbl-uv">UV Gevaar</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ffdd00;"></div><span id="lbl-daylight">Daglicht</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2a2a22;"></div><span id="lbl-night">Nacht</span></div>
+  </div>
+  <div class="dual-time-row">
+    <div class="time-box solar">
+      <span class="label" id="lbl-solar-time">&#9728;&#65039; Ware Zonnetijd</span>
+      <div id="solar-time" class="big-time" style="font-size:1.4rem;">--:--:--</div>
+      <div id="solar-diff" style="font-size:0.72rem;color:var(--green);font-weight:bold;margin-top:4px;">EOT: --</div>
+    </div>
+    <div class="time-box home">
+      <span class="label" style="color:var(--blue);">&#9875; <span id="home-port-label">Thuishaven</span></span>
+      <div id="home-port-time" class="home-time">--:--:--</div>
+      <div id="home-port-status" class="sub-label">CET/CEST</div>
+      <div id="home-port-city" style="font-size:0.52rem;color:#4488ff;margin-top:3px;opacity:0.85;">--</div>
+      <div id="home-location" style="font-size:0.52rem;color:#999;margin-top:2px;line-height:1.4;"></div>
+    </div>
+  </div>
+  <div class="eph-grid">
+    <div class="card" style="border-left:3px solid #333;"><span class="label">&#127757; UTC</span><div id="utc-time" style="font-size:1.05rem;color:#888;">--:--:--</div></div>
+    <div class="card green-border"><span class="label" id="lbl-local">&#128205; Lokaal</span><div id="local-time" style="font-size:1.05rem;">--:--:--</div></div>
+  </div>
+  <div class="card" style="text-align:center;border:1px dashed #222;padding:8px;">
+    <div id="date-display" style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;">--</div>
+    <div id="year-display" style="font-size:0.58rem;color:var(--green);opacity:0.6;">--</div>
+  </div>
+</div>
+
+<div id="view-solar" class="view">
+  <span class="label" id="lbl-solar-eph">Solaire Ephemeriden</span>
+  <div class="card gold-border">
+    <span class="label" id="lbl-solar-noon">Solar Noon (Zonshoogte Max)</span>
+    <div id="val-noon" style="font-size:1.75rem;color:var(--gold);font-weight:bold;">--:--:--</div>
+  </div>
+  <div class="eph-grid">
+    <div class="eph-box"><span class="label" id="lbl-rise">Opkomst</span><div id="out-rise" class="eph-val">--:--</div></div>
+    <div class="eph-box"><span class="label" id="lbl-set">Ondergang</span><div id="out-set" class="eph-val">--:--</div></div>
+    <div class="eph-box"><span class="label" id="lbl-gold-m">Gouden Uur (O)</span><div id="out-gold-morning" class="eph-val">--:--</div><div id="dur-gold-morning" class="eph-sub">-</div></div>
+    <div class="eph-box"><span class="label" id="lbl-gold-e">Gouden Uur (A)</span><div id="out-gold-evening" class="eph-val">--:--</div><div id="dur-gold-evening" class="eph-sub">-</div></div>
+  </div>
+  <div class="card" style="border-left:3px solid #ff3333;">
+    <span class="label" style="color:#ff7070;" id="lbl-uv-danger">UV Gevaarzone</span>
+    <div class="eph-grid" style="margin-top:6px;">
+      <div class="eph-box"><span class="label">Start</span><div id="uv-start" class="eph-val" style="color:#ff7070;">--:--</div></div>
+      <div class="eph-box"><span class="label">Einde</span><div id="uv-end" class="eph-val" style="color:#ff7070;">--:--</div></div>
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--green);">
+    <span class="label" id="lbl-azimut">&#127759; Azimut &amp; Hoogte</span>
+    <div class="eph-grid" style="margin-top:6px;">
+      <div class="eph-box">
+        <span class="label" id="lbl-azimut-now">Azimut</span>
+        <div id="out-azimut" class="eph-val" style="color:var(--green);">--&#176;</div>
+        <div id="out-azimut-compass" class="eph-sub">--</div>
+      </div>
+      <div class="eph-box">
+        <span class="label" id="lbl-sun-alt">Hoogte boven horizon</span>
+        <div id="out-sun-alt" class="eph-val" style="color:var(--gold);">--&#176;</div>
+        <div id="out-sun-alt-sub" class="eph-sub">--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="view-lunar" class="view">
+  <span class="label" id="lbl-moon-title">Maan Fase &amp; Hoek</span>
+  <div class="card" style="text-align:center;padding:15px;">
+    <div id="moon-icon" style="font-size:3.2rem;margin-bottom:5px;">&#127761;</div>
+    <div id="moon-phase-name" style="color:var(--gold);font-weight:bold;font-size:0.73rem;letter-spacing:1px;">--</div>
+  </div>
+  <div class="eph-grid">
+    <div class="eph-box"><span class="label" id="lbl-moon-rise">Maan Op</span><div id="moon-rise" class="eph-val">--:--</div></div>
+    <div class="eph-box"><span class="label" id="lbl-moon-set">Maan Onder</span><div id="moon-set" class="eph-val">--:--</div></div>
+    <div class="eph-box"><span class="label" id="lbl-illum">Verlichting</span><div id="moon-illum" class="eph-val" style="color:var(--gold);">--%</div></div>
+    <div class="eph-box"><span class="label" id="lbl-pos-angle">Positie Hoek</span><div id="moon-deg" class="eph-val" style="color:var(--green);">--&#176;</div><div class="eph-sub">180&#176; = VOL</div></div>
+    <div class="eph-box"><span class="label" id="lbl-age">Ouderdom</span><div id="moon-age" class="eph-val">-- d</div></div>
+    <div class="eph-box"><span class="label" id="lbl-segment">Segment</span><div id="moon-phase-num" class="eph-val">--/8</div></div>
+  </div>
+</div>
+
+<div id="view-log">
+  <div id="log-header-row">
+    <span class="label" style="margin-bottom:0;" id="lbl-month-overview">Maandoverzicht</span>
+    <span id="log-month-year" style="font-size:0.68rem;color:var(--green);font-weight:bold;">--</span>
+  </div>
+  <div id="log-scroll-wrap">
+    <div class="log-table-wrap">
+      <table><thead><tr>
+        <th id="th-day">DAG</th><th id="th-rise">OP</th><th id="th-noon">MIDDAG</th><th id="th-set">AF</th>
+      </tr></thead><tbody id="log-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div id="view-config" class="view" style="gap:10px;">
+  <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#9881;&#65039; <span id="lbl-config-title">Instellingen</span></span>
+  <div class="cfg-section-title" id="lbl-cfg-lang">Taal / Language / Langue</div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-lang-setting">Taal</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn active" onclick="setLang('nl',this)">NL</button>
+      <button class="seg-btn" onclick="setLang('en',this)">EN</button>
+      <button class="seg-btn" onclick="setLang('fr',this)">FR</button>
+    </div>
+  </div>
+  <div class="cfg-section-title" id="lbl-cfg-units">Eenheden</div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-time-fmt">Tijdformaat</div><div class="setting-desc" id="lbl-time-fmt-desc">24u of 12u AM/PM</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn active" onclick="setUnit('timeFormat','24h',this)">24h</button>
+      <button class="seg-btn" onclick="setUnit('timeFormat','12h',this)">12h</button>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-coord-fmt">Coordinaten</div><div class="setting-desc">DD / DMS / DDM</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn active" onclick="setUnit('coordFormat','DD',this)">DD</button>
+      <button class="seg-btn" onclick="setUnit('coordFormat','DMS',this)">DMS</button>
+      <button class="seg-btn" onclick="setUnit('coordFormat','DDM',this)">DDM</button>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-temp-unit">Temperatuur</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn active" onclick="setUnit('tempUnit','C',this)">&#176;C</button>
+      <button class="seg-btn" onclick="setUnit('tempUnit','F',this)">&#176;F</button>
+    </div>
+  </div>
+  <div class="cfg-section-title" id="lbl-cfg-voice">Spraak</div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-voice-on">Gesproken output</div><div class="setting-desc" id="lbl-voice-desc">Web Speech API</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn" id="voice-on-btn" onclick="setVoice(true,this)">AAN</button>
+      <button class="seg-btn active" id="voice-off-btn" onclick="setVoice(false,this)">UIT</button>
+    </div>
+  </div>
+  <div class="setting-row">
+    <div><div class="setting-label" id="lbl-voice-speed">Spreeksnelheid</div></div>
+    <div class="seg-ctrl">
+      <button class="seg-btn" onclick="setUnit('voiceRate',0.8,this)" id="vr-slow">Traag</button>
+      <button class="seg-btn active" onclick="setUnit('voiceRate',1.0,this)" id="vr-normal">Normaal</button>
+      <button class="seg-btn" onclick="setUnit('voiceRate',1.3,this)" id="vr-fast">Snel</button>
+    </div>
+  </div>
+  <div class="cfg-section-title" id="lbl-cfg-home">Thuishaven</div>
+  <div class="cfg-info-box">
+    <div class="cfg-row"><span class="cfg-key" id="lbl-hp-name">Naam</span><span class="cfg-val blue" id="cfg-home-name">--</span></div>
+    <div class="cfg-row"><span class="cfg-key" id="lbl-hp-offset">UTC Offset</span><span class="cfg-val gold" id="cfg-home-offset">--</span></div>
+    <div class="cfg-row"><span class="cfg-key">DST</span><span class="cfg-val green" id="cfg-home-dst">--</span></div>
+  </div>
+  <button class="cfg-btn" onclick="configureHomePort()" id="btn-set-home">&#128205; Stel thuishaven in</button>
+  <div class="cfg-section-title" id="lbl-cfg-favs">Favorieten beheren</div>
+  <div id="fav-manage-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+  <div style="font-size:0.55rem;color:var(--muted);margin-top:4px;" id="lbl-fav-info">Max 4 favorieten - Home is altijd aanwezig</div>
+  <div class="cfg-section-title" id="lbl-cfg-data">Data</div>
+  <button class="cfg-btn danger" onclick="resetAll()" id="btn-reset">&#128465; Reset alle instellingen</button>
+</div>
+
+<div id="view-info" class="view" style="gap:10px;">
+  <div class="info-lang-toggle">
+    <button class="info-lang-btn active" onclick="switchInfoLang('nl',this)" aria-label="Nederlands">NL</button>
+    <button class="info-lang-btn" onclick="switchInfoLang('en',this)" aria-label="English">EN</button>
+    <button class="info-lang-btn" onclick="switchInfoLang('fr',this)" aria-label="Français">FR</button>
+  </div>
+
+  <!-- NEDERLANDS -->
+  <div id="info-nl" class="info-block active">
+    <div class="info-section"><h3>🏠 Home</h3><p>De startpagina toont de elliptische zonneboog met gekleurde segmenten: blauw voor het gouden uur, rood voor de UV-gevaarzone, geel voor normaal daglicht. Het zonnetje beweegt langs de boog. Daaronder staan de ware zonnetijd, thuishaven-tijd, UTC, lokale tijd en het adres.</p></div>
+    <div class="info-section"><h3>☀️ Zon</h3><p>Toont alle solaire ephemeriden: solar noon, opkomst, ondergang, gouden uur ochtend en avond met duur, en de UV-gevaarzone met begin- en eindtijd.</p></div>
+    <div class="info-section"><h3>Ware Zonnetijd &amp; EOT</h3><p>De ware zonnetijd is gebaseerd op de werkelijke positie van de zon. Ze verschilt van de kloktijd door de tijdszone en de tijdsvergelijking (EOT). De EOT varieert tussen -16 en +14 minuten door het jaar.</p></div>
+    <div class="info-section"><h3>🌙 Maan</h3><p>Toont de huidige maanfase (1-8), verlichting in procent, positiehoek, ouderdom in dagen, en de geschatte op- en ondergang van de maan.</p></div>
+    <div class="info-section"><h3>📅 Maandlog</h3><p>Overzicht van alle zonsopkomst-, middag- en ondergangstijden voor elke dag van de huidige maand. De huidige dag is groen gemarkeerd.</p></div>
+    <div class="info-section"><h3>🌤️ Weer</h3><p>Actueel weerbericht via OpenWeatherMap op basis van uw GPS-positie. Toont temperatuur (min/max uit 24u-forecast), gevoelstemperatuur, wind met Beaufort-schaal, luchtdruk, bewolking en neerslag.</p></div>
+    <div class="info-section"><h3>❤️ Plaatsen (POI)</h3><p>Sla uw huidige GPS-positie op met een naam. Het adres wordt automatisch opgezocht via Nominatim. Elke plaats kan hernoemd, bijgewerkt of verwijderd worden.</p></div>
+    <div class="info-section"><h3>🌅 Zonnekalender</h3><p>Alle schemertijden van de dag in chronologische volgorde via SunCalc: van nadir over nautische en burgerlijke dageraad, gouden uur, solar noon, tot volledige nacht. De huidige fase is gemarkeerd.</p></div>
+    <div class="info-section"><h3>🗺️ Kaart</h3><p>Toont uw huidige positie op een OpenStreetMap-kaart met een pulserende groene stip. Als een thuishaven is ingesteld, verschijnt een ankersymbool met een stippellijn en de afstand in km plus kompasrichting.</p></div>
+    <div class="info-section"><h3>⭐ Sterrenbeelden</h3><p>De 12 dierenriemtekens met symbool, naam, datumperiode, element (vuur/aarde/lucht/water) en heersende planeet. Het huidige sterrenbeeld op basis van de datum is goud gemarkeerd.</p></div>
+    <div class="info-section"><h3>🌕 Volle Manen</h3><p>Exacte datum en UTC-tijd van elke volle maan van januari tot december, berekend via de astronomische formule van Jean Meeus. Huidige maand is gemarkeerd. Blauwe manen worden apart vermeld.</p></div>
+    <div class="info-section"><h3>🔭 Astronomische Gebeurtenissen</h3><p>Chronologisch overzicht van bijzondere gebeurtenissen voor de komende 5 jaar: supermanen, micromanen, rode manen, maansverduisteringen (totaal/gedeeltelijk/penumbrisch) en zonsverduisteringen (totaal/ringvormig/gedeeltelijk) met magnitude.</p></div>
+    <div class="info-section"><h3>📡 Deel Locatie</h3><p>Deel uw huidige GPS-positie met vrienden. Het adres wordt opgezocht op straatniveau (zoom 19). De deelknop gebruikt de native share-API van uw toestel. De Google Maps-link opent direct in de kaartapp.</p></div>
+    <div class="info-section"><h3>⚙️ Instellingen</h3><p>Stel taal (NL/EN/FR), tijdformaat (24u/12u), coordinatenformaat (DD/DMS/DDM), temperatuureenheid (°C/°F) en spraak in. De thuishaven met UTC-offset wordt hier beheerd. Favorieten zijn per pagina in- of uitschakelbaar.</p></div>
+  </div>
+
+  <!-- ENGLISH -->
+  <div id="info-en" class="info-block">
+    <div class="info-section"><h3>🏠 Home</h3><p>The home screen shows an elliptical sun arc with colour-coded segments: blue for golden hour, red for UV danger zone, yellow for daylight. The sun icon moves along the arc. Below are true solar time, home port time, UTC, local time and address.</p></div>
+    <div class="info-section"><h3>☀️ Sun</h3><p>Shows all solar ephemerides: solar noon, sunrise, sunset, morning and evening golden hour with duration, and the UV danger zone with start and end times.</p></div>
+    <div class="info-section"><h3>True Solar Time &amp; EOT</h3><p>True solar time is based on the actual position of the sun. It differs from clock time due to the time zone and the equation of time (EOT), which varies between -16 and +14 minutes throughout the year.</p></div>
+    <div class="info-section"><h3>🌙 Moon</h3><p>Shows the current moon phase (1-8), illumination percentage, position angle, age in days, and estimated moonrise and moonset times.</p></div>
+    <div class="info-section"><h3>📅 Monthly Log</h3><p>Overview of sunrise, noon and sunset times for every day of the current month. Today is highlighted in green.</p></div>
+    <div class="info-section"><h3>🌤️ Weather</h3><p>Live weather via OpenWeatherMap based on your GPS position. Shows temperature (min/max from 24h forecast), feels-like, wind with Beaufort scale, pressure, cloud cover and precipitation.</p></div>
+    <div class="info-section"><h3>❤️ Saved Places (POI)</h3><p>Save your current GPS position with a custom name. The address is automatically retrieved via Nominatim. Each place can be renamed, refreshed or deleted.</p></div>
+    <div class="info-section"><h3>🌅 Sun Calendar</h3><p>All twilight phases of the day in chronological order via SunCalc: from nadir through nautical and civil dawn, golden hour, solar noon, to full night. The current phase is highlighted.</p></div>
+    <div class="info-section"><h3>🗺️ Map</h3><p>Shows your current position on an OpenStreetMap with a pulsing green dot. If a home port is set, an anchor icon appears with a dashed line showing distance in km and compass bearing.</p></div>
+    <div class="info-section"><h3>⭐ Star Signs</h3><p>All 12 zodiac signs with symbol, name, date range, element (fire/earth/air/water) and ruling planet. The current sign based on today's date is highlighted in gold.</p></div>
+    <div class="info-section"><h3>🌕 Full Moons</h3><p>Exact date and UTC time of every full moon from January to December, calculated using the Jean Meeus astronomical formula. Current month is highlighted. Blue moons are listed separately.</p></div>
+    <div class="info-section"><h3>🔭 Astronomical Events</h3><p>Chronological overview of special events for the next 5 years: supermoons, micromoons, blood moons, lunar eclipses (total/partial/penumbral) and solar eclipses (total/annular/partial) with magnitude.</p></div>
+    <div class="info-section"><h3>📡 Share Location</h3><p>Share your current GPS position with friends. The address is retrieved at street level (zoom 19). The share button uses your device's native share API. The Google Maps link opens directly in the maps app.</p></div>
+    <div class="info-section"><h3>⚙️ Settings</h3><p>Configure language (NL/EN/FR), time format (24h/12h), coordinate format (DD/DMS/DDM), temperature unit (°C/°F) and voice output. Home port with UTC offset is managed here. Favourites can be toggled per page.</p></div>
+  </div>
+
+  <!-- FRANÇAIS -->
+  <div id="info-fr" class="info-block">
+    <div class="info-section"><h3>🏠 Accueil</h3><p>L'ecran d'accueil affiche un arc solaire elliptique avec des segments codes par couleur: bleu pour l'heure doree, rouge pour la zone UV, jaune pour la lumiere du jour. L'icone soleil se deplace le long de l'arc.</p></div>
+    <div class="info-section"><h3>☀️ Soleil</h3><p>Affiche toutes les ephemerides solaires: midi solaire, lever, coucher, heure doree matin et soir avec duree, et la zone de danger UV avec heures de debut et de fin.</p></div>
+    <div class="info-section"><h3>Heure solaire &amp; EOT</h3><p>L'heure solaire vraie est basee sur la position reelle du soleil. Elle differe de l'heure legale en raison du fuseau horaire et de l'equation du temps (EOT), qui varie entre -16 et +14 minutes.</p></div>
+    <div class="info-section"><h3>🌙 Lune</h3><p>Affiche la phase lunaire actuelle (1-8), l'illumination en pourcentage, l'angle de position, l'age en jours, et les heures estimees de lever et coucher de lune.</p></div>
+    <div class="info-section"><h3>📅 Journal mensuel</h3><p>Apercu des heures de lever, midi et coucher du soleil pour chaque jour du mois en cours. Le jour actuel est surligne en vert.</p></div>
+    <div class="info-section"><h3>🌤️ Meteo</h3><p>Meteo en direct via OpenWeatherMap basee sur votre position GPS. Affiche la temperature (min/max depuis la prevision 24h), ressenti, vent avec echelle Beaufort, pression, nebulosite et precipitations.</p></div>
+    <div class="info-section"><h3>❤️ Lieux (POI)</h3><p>Enregistrez votre position GPS actuelle avec un nom personnalise. L'adresse est recuperee automatiquement via Nominatim. Chaque lieu peut etre renomme, actualise ou supprime.</p></div>
+    <div class="info-section"><h3>🌅 Calendrier solaire</h3><p>Toutes les phases du crepuscule dans l'ordre chronologique via SunCalc: du nadir a l'aube nautique et civile, l'heure doree, le midi solaire, jusqu'a la nuit complete. La phase actuelle est marquee.</p></div>
+    <div class="info-section"><h3>🗺️ Carte</h3><p>Affiche votre position sur une carte OpenStreetMap avec un point vert pulsant. Si un port d'attache est defini, une ancre apparait avec une ligne pointillee indiquant la distance en km et le cap.</p></div>
+    <div class="info-section"><h3>⭐ Signes du zodiaque</h3><p>Les 12 signes avec symbole, nom, periode, element (feu/terre/air/eau) et planete dominante. Le signe actuel base sur la date d'aujourd'hui est surligne en or.</p></div>
+    <div class="info-section"><h3>🌕 Pleines Lunes</h3><p>Date et heure UTC exactes de chaque pleine lune de janvier a decembre, calculees via la formule astronomique de Jean Meeus. Le mois actuel est marque. Les lunes bleues sont listees separement.</p></div>
+    <div class="info-section"><h3>🔭 Evenements Astronomiques</h3><p>Apercu chronologique des evenements speciaux pour les 5 prochaines annees: superlunes, microlunes, lunes de sang, eclipses lunaires (totale/partielle/penombrale) et eclipses solaires avec magnitude.</p></div>
+    <div class="info-section"><h3>📡 Partager Position</h3><p>Partagez votre position GPS avec vos amis. L'adresse est recuperee au niveau de la rue (zoom 19). Le bouton utilise l'API de partage native de votre appareil. Le lien Google Maps s'ouvre directement dans l'app.</p></div>
+    <div class="info-section"><h3>⚙️ Reglages</h3><p>Configurez la langue (NL/EN/FR), le format heure (24h/12h), les coordonnees (DD/DMS/DDM), l'unite de temperature (°C/°F) et la voix. Le port d'attache avec decalage UTC est gere ici.</p></div>
+  </div>
+
+  <!-- Versie -->
+  <div class="info-section" style="border-left-color:var(--green);">
+    <h3 style="color:var(--green);">Zonnewijzer Pro v6</h3>
+    <p>14 paginas · PWA · Offline · GPS · EOT · SunCalc · OpenWeatherMap · Leaflet/OSM · Web Share API · i18n NL/EN/FR · Jean Meeus astronomie</p>
+  </div>
+</div>
+
+<!-- WEER -->
+<div id="view-weer" class="view" style="gap:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#127780;&#65039; <span id="lbl-weer-title">Weerbericht</span></span>
+    <button onclick="fetchWeer()" style="background:var(--dim-blue);border:1px solid var(--blue);color:var(--blue);font-family:'Courier New',monospace;font-size:0.55rem;padding:5px 8px;cursor:pointer;text-transform:uppercase;border-radius:2px;">&#128260; <span id="lbl-weer-refresh">Vernieuwen</span></button>
+  </div>
+  <div id="weer-status" class="cfg-status pending" style="display:none;"></div>
+  <div id="weer-main" style="display:none;">
+    <div class="card gold-border" style="text-align:center;padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+        <img id="weer-icon" src="" alt="" style="width:52px;height:52px;display:none;">
+        <div>
+          <div id="weer-temp" style="font-size:2.4rem;color:var(--gold);font-weight:bold;line-height:1;">--</div>
+          <div id="weer-desc" style="font-size:0.65rem;color:#bbb;margin-top:2px;text-transform:capitalize;">--</div>
+        </div>
+      </div>
+      <div id="weer-city" style="font-size:0.58rem;color:var(--green);margin-top:6px;letter-spacing:1px;">--</div>
+    </div>
+    <div class="eph-grid">
+      <div class="eph-box"><span class="label" id="lbl-feels">Gevoelstemperatuur</span><div id="weer-feels" class="eph-val">--</div></div>
+      <div class="eph-box"><span class="label" id="lbl-humidity">Vochtigheid</span><div id="weer-humid" class="eph-val" style="color:var(--blue);">--%</div></div>
+      <div class="eph-box"><span class="label" id="lbl-temp-min">Min</span><div id="weer-min" class="eph-val">--</div></div>
+      <div class="eph-box"><span class="label" id="lbl-temp-max">Max</span><div id="weer-max" class="eph-val">--</div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <span class="label" id="lbl-wind">&#128168; Wind</span>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+        <div id="weer-wind-speed" style="font-size:1.4rem;font-weight:bold;color:var(--blue);">--</div>
+        <div id="weer-beaufort" style="font-size:0.65rem;color:#aaa;">--</div>
+      </div>
+      <div id="weer-beaufort-desc" style="font-size:0.58rem;color:#999;margin-top:2px;">--</div>
+    </div>
+    <div class="eph-grid">
+      <div class="eph-box"><span class="label" id="lbl-pressure">Luchtdruk</span><div id="weer-pressure" class="eph-val" style="font-size:0.95rem;">--</div></div>
+      <div class="eph-box"><span class="label" id="lbl-clouds">Bewolking</span><div id="weer-clouds" class="eph-val">--%</div></div>
+      <div class="eph-box" style="grid-column:span 2;"><span class="label" id="lbl-rain">Neerslag</span><div id="weer-rain" class="eph-val" style="font-size:0.85rem;">--</div></div>
+    </div>
+    <div class="eph-grid">
+      <div class="eph-box"><span class="label" id="lbl-w-sunrise">Zonsopgang</span><div id="weer-sunrise" class="eph-val">--:--</div></div>
+      <div class="eph-box"><span class="label" id="lbl-w-sunset">Zonsondergang</span><div id="weer-sunset" class="eph-val">--:--</div></div>
+    </div>
+    <div id="weer-updated" style="font-size:0.52rem;color:#333;text-align:right;padding:2px 0;"></div>
+  </div>
+</div>
+
+<!-- POI -->
+<div id="view-poi" style="display:none;flex-direction:column;padding:10px 12px 0;min-height:0;flex:1;overflow:hidden;">
+  <!-- Header — altijd zichtbaar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;margin-bottom:8px;">
+    <span class="label" style="font-size:0.72rem;letter-spacing:2px;margin-bottom:0;">&#10084;&#65039; <span id="lbl-poi-title">Opgeslagen Plaatsen</span></span>
+    <div style="display:flex;gap:6px;">
+      <button onclick="exportGPX()" style="display:none;background:var(--dim-blue);border:1px solid var(--blue);color:var(--blue);font-family:'Courier New',monospace;font-size:0.52rem;padding:5px 7px;cursor:pointer;text-transform:uppercase;border-radius:2px;" id="btn-gpx-export">&#128190; GPX</button>
+      <button onclick="poiAddCurrent()" style="background:rgba(255,0,80,0.12);border:1px solid #ff6b8a;color:#ff6b8a;font-family:'Courier New',monospace;font-size:0.55rem;padding:5px 8px;cursor:pointer;text-transform:uppercase;border-radius:2px;">+ <span id="lbl-poi-add-btn">Voeg toe</span></button>
+    </div>
+  </div>
+  <!-- Actie toolbar — zichtbaar bij selectie, buiten scrollzone -->
+  <div id="poi-toolbar-fixed" style="display:none;flex-direction:row;gap:8px;flex-shrink:0;
+    padding:6px 0 8px;border-bottom:1px solid var(--border);margin-bottom:6px;"></div>
+  <!-- Scrollbare lijst -->
+  <div id="poi-scroll-wrap" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding-bottom:8px;">
+    <div id="poi-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="poi-empty" style="display:none;text-align:center;padding:30px 10px;border:1px dashed #222;border-radius:2px;">
+      <div style="font-size:2rem;margin-bottom:8px;">&#10084;&#65039;</div>
+      <div style="font-size:0.65rem;color:var(--muted);" id="lbl-poi-empty">Nog geen plaatsen opgeslagen.</div>
+      <div style="font-size:0.58rem;color:#333;margin-top:4px;" id="lbl-poi-hint">Tik op + om je huidige locatie toe te voegen.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONNEKALENDER -->
+<div id="view-kalender" class="view" style="gap:8px;">
+  <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#127749; <span id="lbl-kal-title">Zonnekalender</span></span>
+  <div id="kal-date" style="font-size:0.65rem;color:var(--gold);text-transform:capitalize;padding-bottom:4px;border-bottom:1px solid #222;"></div>
+  <div id="kal-no-gps" class="cfg-status error" style="display:none;"></div>
+  <div id="kal-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <div class="card" style="flex:1;border-left:3px solid var(--gold);padding:10px 12px;">
+      <span class="label" id="lbl-kal-daylen">Daglengte</span>
+      <div id="kal-daylen" style="font-size:1.0rem;color:var(--gold);font-weight:bold;">--</div>
+    </div>
+    <div class="card" style="flex:1;border-left:3px solid #334;padding:10px 12px;">
+      <span class="label" id="lbl-kal-nightlen">Nachtlengte</span>
+      <div id="kal-nightlen" style="font-size:1.0rem;color:#556;font-weight:bold;">--</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- KAART -->
+<div id="view-kaart" class="view" style="gap:8px;padding:10px 12px 8px;">
+  <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#128506;&#65039; <span id="lbl-kaart-title">Mijn Positie</span></span>
+
+  <!-- Kaart container -->
+  <div id="kaart-wrap" style="position:relative;width:100%;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+    <div id="leaflet-map" style="width:100%;height:300px;background:#111;"></div>
+    <div id="kaart-no-gps" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);
+      display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--red);">
+      GPS SYNC...
+    </div>
+  </div>
+
+  <!-- Info paneel: afstand thuishaven -->
+  <div class="card" style="border-left:3px solid var(--blue);">
+    <span class="label" id="lbl-kaart-dist">Afstand thuishaven</span>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px;">
+      <div id="kaart-dist-val" style="font-size:1.6rem;font-weight:bold;color:var(--blue);font-variant-numeric:tabular-nums;">--</div>
+      <div id="kaart-dist-unit" style="font-size:0.65rem;color:#999;">km</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <div>
+        <span class="label" id="lbl-kaart-bearing" style="margin-bottom:1px;">Richting</span>
+        <div id="kaart-bearing-val" style="font-size:0.85rem;font-weight:bold;color:var(--green);">--</div>
+      </div>
+      <div style="margin-left:16px;">
+        <span class="label" id="lbl-kaart-home" style="margin-bottom:1px;">Thuishaven</span>
+        <div id="kaart-home-name" style="font-size:0.85rem;font-weight:bold;color:var(--gold);">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coordinaten huidig -->
+  <div class="card green-border" style="font-size:0.65rem;">
+    <span class="label" id="lbl-kaart-you">U bent hier</span>
+    <div id="kaart-coords" style="color:var(--green);font-weight:bold;margin-top:2px;font-size:0.72rem;">--</div>
+  </div>
+
+  <div id="kaart-no-home-msg" style="display:none;font-size:0.6rem;color:var(--muted);text-align:center;padding:6px;" id="lbl-kaart-no-home"></div>
+</div>
+
+
+<!-- STERRENBEELDEN -->
+<div id="view-sterren" class="view" style="gap:8px;">
+  <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#11088; <span id="lbl-sterren-title">Sterrenbeelden</span></span>
+
+  <!-- Huidig sterrenbeeld banner -->
+  <div id="sterren-current" class="card" style="border-left:3px solid var(--gold);text-align:center;padding:14px 12px;"></div>
+
+  <!-- Sectielabel -->
+  <div style="font-size:0.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;padding:2px 0 2px;" id="lbl-sterren-today">Huidig sterrenbeeld</div>
+
+  <!-- Alle 12 sterrenbeelden -->
+  <div id="sterren-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+
+
+<!-- VOLLE MANEN -->
+<div id="view-fullmoon" class="view" style="gap:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#127765; <span id="lbl-fullmoon-title">Volle Manen</span></span>
+    <span id="lbl-fullmoon-year" style="font-size:0.65rem;color:var(--green);font-weight:bold;"></span>
+  </div>
+  <div id="fullmoon-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+
+
+<!-- DEEL LOCATIE -->
+<div id="view-delen" class="view" style="gap:10px;">
+  <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#128225; <span id="lbl-delen-title">Deel Locatie</span></span>
+
+  <!-- Geen GPS melding -->
+  <div id="delen-no-gps" class="cfg-status error" style="display:none;"></div>
+
+  <!-- Info paneel -->
+  <div id="delen-info" style="display:none;flex-direction:column;gap:8px;">
+
+    <!-- Adres -->
+    <div class="card" style="border-left:3px solid var(--green);">
+      <span class="label" id="lbl-delen-addr-lbl">Adres</span>
+      <div id="delen-address" style="font-size:0.72rem;color:#ccc;line-height:1.6;margin-top:3px;font-style:italic;">...</div>
+    </div>
+
+    <!-- Coordinaten + nauwkeurigheid -->
+    <div class="eph-grid">
+      <div class="eph-box">
+        <span class="label" id="lbl-delen-coords">Coordinaten</span>
+        <div id="delen-coords-val" style="font-size:0.68rem;color:var(--green);font-weight:bold;margin-top:3px;line-height:1.5;"></div>
+      </div>
+      <div class="eph-box">
+        <span class="label" id="lbl-delen-acc">Nauwkeurigheid</span>
+        <div id="delen-acc-val" class="eph-val" style="font-size:1.0rem;">-- m</div>
+      </div>
+    </div>
+
+    <!-- Google Maps link -->
+    <div class="card" style="border-left:3px solid var(--blue);padding:10px 12px;">
+      <span class="label" style="color:var(--blue);margin-bottom:6px;">Google Maps</span>
+      <div id="delen-maps-url" style="font-size:0.56rem;color:#4466aa;word-break:break-all;line-height:1.5;margin-bottom:8px;font-family:'Courier New',monospace;"></div>
+      <button id="btn-open-maps" onclick="delenOpenMaps()"
+        class="cfg-btn blue" style="margin-top:0;">
+        &#128506; <span id="lbl-delen-open-maps">Open in Google Maps</span>
+      </button>
+    </div>
+
+    <!-- Deel + Kopieer knoppen -->
+    <button id="btn-delen-share" onclick="delenShare()"
+      class="cfg-btn" style="font-size:0.72rem;">
+      &#128225; <span id="lbl-delen-share-btn">Deel mijn locatie</span>
+    </button>
+
+    <button id="btn-delen-copy" onclick="delenCopy()"
+      class="cfg-btn" style="background:rgba(68,136,255,0.1);border-color:var(--blue);color:var(--blue);">
+      &#128203; <span id="lbl-delen-copy-btn">Kopieer link</span>
+    </button>
+
+    <!-- Ververs -->
+    <button onclick="initDelen()"
+      style="background:transparent;border:1px solid #222;color:var(--muted);
+      font-family:'Courier New',monospace;font-size:0.58rem;padding:8px;
+      cursor:pointer;border-radius:2px;text-transform:uppercase;letter-spacing:1px;width:100%;">
+      &#128260; Ververs adres
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ASTRONOMISCHE GEBEURTENISSEN -->
+<div id="view-astro" class="view" style="gap:8px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <span class="label" style="font-size:0.72rem;letter-spacing:2px;">&#128301; <span id="lbl-astro-title">Astronomische Gebeurtenissen</span></span>
+    <span id="astro-year-range" style="font-size:0.62rem;color:var(--green);font-weight:bold;"></span>
+  </div>
+  <div id="astro-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+
+</main><!-- #app -->
+<nav id="fav-bar" aria-label="Navigatie"></nav>
+
+<script src="suncalc.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>

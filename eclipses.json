@@ -1,0 +1,450 @@
+{
+  "version": "1.1",
+  "updated": "2026-05",
+  "source": "NASA/Espenak — eclipse.gsfc.nasa.gov",
+  "note": "Update dit bestand elke 5 jaar met nieuwe NASA-data. Versienummer ophogen.",
+  "solar": [
+    {
+      "y": 2025,
+      "m": 3,
+      "d": 29,
+      "h": 10,
+      "mi": 48,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.938
+    },
+    {
+      "y": 2025,
+      "m": 9,
+      "d": 21,
+      "h": 19,
+      "mi": 43,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.855
+    },
+    {
+      "y": 2026,
+      "m": 2,
+      "d": 17,
+      "h": 12,
+      "mi": 13,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.963
+    },
+    {
+      "y": 2026,
+      "m": 8,
+      "d": 12,
+      "h": 17,
+      "mi": 47,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.039
+    },
+    {
+      "y": 2027,
+      "m": 2,
+      "d": 6,
+      "h": 16,
+      "mi": 0,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.928
+    },
+    {
+      "y": 2027,
+      "m": 8,
+      "d": 2,
+      "h": 10,
+      "mi": 7,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.079
+    },
+    {
+      "y": 2028,
+      "m": 1,
+      "d": 26,
+      "h": 15,
+      "mi": 55,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.921
+    },
+    {
+      "y": 2028,
+      "m": 7,
+      "d": 22,
+      "h": 2,
+      "mi": 56,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.057
+    },
+    {
+      "y": 2029,
+      "m": 1,
+      "d": 14,
+      "h": 17,
+      "mi": 13,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.871
+    },
+    {
+      "y": 2029,
+      "m": 6,
+      "d": 12,
+      "h": 4,
+      "mi": 6,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.458
+    },
+    {
+      "y": 2029,
+      "m": 7,
+      "d": 11,
+      "h": 15,
+      "mi": 37,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.23
+    },
+    {
+      "y": 2029,
+      "m": 12,
+      "d": 5,
+      "h": 15,
+      "mi": 3,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.891
+    },
+    {
+      "y": 2030,
+      "m": 6,
+      "d": 1,
+      "h": 6,
+      "mi": 29,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.944
+    },
+    {
+      "y": 2030,
+      "m": 11,
+      "d": 25,
+      "h": 6,
+      "mi": 51,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.047
+    },
+    {
+      "y": 2031,
+      "m": 5,
+      "d": 21,
+      "h": 7,
+      "mi": 16,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.974
+    },
+    {
+      "y": 2031,
+      "m": 11,
+      "d": 14,
+      "h": 20,
+      "mi": 7,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.9
+    },
+    {
+      "y": 2032,
+      "m": 4,
+      "d": 28,
+      "h": 15,
+      "mi": 12,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.985
+    },
+    {
+      "y": 2032,
+      "m": 10,
+      "d": 22,
+      "h": 6,
+      "mi": 47,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.768
+    },
+    {
+      "y": 2033,
+      "m": 3,
+      "d": 30,
+      "h": 18,
+      "mi": 2,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.025
+    },
+    {
+      "y": 2033,
+      "m": 9,
+      "d": 23,
+      "h": 12,
+      "mi": 55,
+      "type": "partial_solar",
+      "icon": "🌑",
+      "mag": 0.905
+    },
+    {
+      "y": 2034,
+      "m": 3,
+      "d": 20,
+      "h": 10,
+      "mi": 18,
+      "type": "total_solar",
+      "icon": "🌑",
+      "mag": 1.005
+    },
+    {
+      "y": 2034,
+      "m": 9,
+      "d": 12,
+      "h": 15,
+      "mi": 30,
+      "type": "annular_solar",
+      "icon": "💍",
+      "mag": 0.953
+    }
+  ],
+  "lunar": [
+    {
+      "y": 2025,
+      "m": 3,
+      "d": 14,
+      "h": 6,
+      "mi": 59,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.178
+    },
+    {
+      "y": 2025,
+      "m": 9,
+      "d": 7,
+      "h": 18,
+      "mi": 12,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.361
+    },
+    {
+      "y": 2026,
+      "m": 3,
+      "d": 3,
+      "h": 11,
+      "mi": 34,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.149
+    },
+    {
+      "y": 2026,
+      "m": 8,
+      "d": 28,
+      "h": 4,
+      "mi": 14,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.934
+    },
+    {
+      "y": 2027,
+      "m": 2,
+      "d": 20,
+      "h": 23,
+      "mi": 14,
+      "type": "penumbral_lunar",
+      "icon": "🌕",
+      "mag": 0.048
+    },
+    {
+      "y": 2027,
+      "m": 7,
+      "d": 18,
+      "h": 16,
+      "mi": 4,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.434
+    },
+    {
+      "y": 2027,
+      "m": 8,
+      "d": 17,
+      "h": 7,
+      "mi": 15,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.109
+    },
+    {
+      "y": 2028,
+      "m": 1,
+      "d": 12,
+      "h": 4,
+      "mi": 14,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.254
+    },
+    {
+      "y": 2028,
+      "m": 7,
+      "d": 6,
+      "h": 18,
+      "mi": 20,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.573
+    },
+    {
+      "y": 2028,
+      "m": 12,
+      "d": 31,
+      "h": 16,
+      "mi": 53,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.245
+    },
+    {
+      "y": 2029,
+      "m": 6,
+      "d": 26,
+      "h": 3,
+      "mi": 23,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.844
+    },
+    {
+      "y": 2029,
+      "m": 12,
+      "d": 20,
+      "h": 22,
+      "mi": 43,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.122
+    },
+    {
+      "y": 2030,
+      "m": 6,
+      "d": 15,
+      "h": 18,
+      "mi": 34,
+      "type": "penumbral_lunar",
+      "icon": "🌕",
+      "mag": 0.322
+    },
+    {
+      "y": 2030,
+      "m": 12,
+      "d": 9,
+      "h": 22,
+      "mi": 27,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.203
+    },
+    {
+      "y": 2031,
+      "m": 5,
+      "d": 7,
+      "h": 3,
+      "mi": 51,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.193
+    },
+    {
+      "y": 2031,
+      "m": 10,
+      "d": 30,
+      "h": 7,
+      "mi": 44,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.309
+    },
+    {
+      "y": 2032,
+      "m": 4,
+      "d": 25,
+      "h": 15,
+      "mi": 13,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.185
+    },
+    {
+      "y": 2032,
+      "m": 10,
+      "d": 18,
+      "h": 19,
+      "mi": 2,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.233
+    },
+    {
+      "y": 2033,
+      "m": 4,
+      "d": 14,
+      "h": 19,
+      "mi": 12,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.085
+    },
+    {
+      "y": 2033,
+      "m": 10,
+      "d": 8,
+      "h": 10,
+      "mi": 55,
+      "type": "partial_lunar",
+      "icon": "🌘",
+      "mag": 0.879
+    },
+    {
+      "y": 2034,
+      "m": 4,
+      "d": 3,
+      "h": 18,
+      "mi": 25,
+      "type": "penumbral_lunar",
+      "icon": "🌕",
+      "mag": 0.225
+    },
+    {
+      "y": 2034,
+      "m": 9,
+      "d": 28,
+      "h": 2,
+      "mi": 45,
+      "type": "total_lunar",
+      "icon": "🔴",
+      "mag": 1.338
+    }
+  ]
+}
