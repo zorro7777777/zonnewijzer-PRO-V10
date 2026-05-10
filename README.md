@@ -1,4 +1,4 @@
-# Zonnewijzer Pro v6
+# Zonnewijzer Pro v10
 
 Een volledig offline PWA voor astronomische data, zonnetijden en navigatie.
 
