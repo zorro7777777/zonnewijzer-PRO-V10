@@ -289,12 +289,9 @@ function applyI18n(){
   const hpO=document.getElementById('lbl-hp-offset');if(hpO)hpO.innerText='UTC Offset';
   const btnHome=document.getElementById('btn-set-home');if(btnHome)btnHome.innerText='📍 '+t('set_home');
   const btnReset=document.getElementById('btn-reset');if(btnReset)btnReset.innerText='🗑 '+t('reset');
-  document.getElementById('vr-slow')?.innerText==t('slow');
-  document.getElementById('vr-normal')?.innerText==t('normal');
-  document.getElementById('vr-fast')?.innerText==t('fast');
-  if(document.getElementById('vr-slow'))document.getElementById('vr-slow').innerText=t('slow');
-  if(document.getElementById('vr-normal'))document.getElementById('vr-normal').innerText=t('normal');
-  if(document.getElementById('vr-fast'))document.getElementById('vr-fast').innerText=t('fast');
+  const vrSlow=document.getElementById('vr-slow');if(vrSlow)vrSlow.innerText=t('slow');
+  const vrNorm=document.getElementById('vr-normal');if(vrNorm)vrNorm.innerText=t('normal');
+  const vrFast=document.getElementById('vr-fast');if(vrFast)vrFast.innerText=t('fast');
   rebuildFavManage();
   if(currentPage==='poi')initPOIPage();
   if(currentPage==='kalender')renderKalender();
@@ -480,9 +477,14 @@ let arcGoldDur=40,arcUVStart=680,arcUVEnd=760;
 function resizeArc(){
   if(!arcCanvas)return;
   const wrap=document.getElementById('arc-wrap');if(!wrap)return;
-  const W=wrap.clientWidth,H=Math.round(W*0.68),dpr=window.devicePixelRatio||1;
-  arcCanvas.width=W*dpr;arcCanvas.height=H*dpr;arcCanvas.style.height=H+'px';
-  arcCtx.setTransform(1,0,0,1,0,0);arcCtx.scale(dpr,dpr);
+  // requestAnimationFrame voorkomt forced reflow —
+  // geometrie lezen pas nadat browser layout klaar is
+  requestAnimationFrame(()=>{
+    const W=wrap.clientWidth,H=Math.round(W*0.68),dpr=window.devicePixelRatio||1;
+    arcCanvas.width=W*dpr;arcCanvas.height=H*dpr;arcCanvas.style.height=H+'px';
+    arcCtx.setTransform(1,0,0,1,0,0);arcCtx.scale(dpr,dpr);
+    drawArc();
+  });
 }
 
 function arcPoint(t,W,CX,CY,RX,RY){const a=Math.PI+t*Math.PI;return{x:CX+RX*Math.cos(a),y:CY+RY*Math.sin(a)};}
@@ -2105,11 +2107,13 @@ window.addEventListener('DOMContentLoaded',()=>{
   updateOnlineStatus();
 
   arcCtx=arcCanvas.getContext('2d');
-  loadSettings();applyI18n();rebuildFavBar();rebuildLauncher();resizeArc();update();
+  loadSettings();applyI18n();rebuildFavBar();rebuildLauncher();
+  // Eerste resize en update na layout — voorkomt forced reflow bij startup
+  requestAnimationFrame(()=>{ resizeArc(); update(); });
   if(!navigator.geolocation){document.getElementById('coords-display').innerText=t('gps_unavailable');}
   else{navigator.geolocation.watchPosition(onGpsSuccess,onGpsError,GPS_OPTS);}
   setTimeout(()=>{syncSegBtn('timeFormat',SETTINGS.timeFormat);syncSegBtn('coordFormat',SETTINGS.coordFormat);syncSegBtn('tempUnit',SETTINGS.tempUnit);syncVoiceBtn(SETTINGS.voice);syncLangBtn(SETTINGS.lang);},100);
-  const ro=new ResizeObserver(()=>{resizeArc();if(currentPage==='home')drawArc();});
+  const ro=new ResizeObserver(()=>{ resizeArc(); }); // drawArc wordt nu aangeroepen in resizeArc via rAF
   const arcWrapEl=document.getElementById('arc-wrap');if(arcWrapEl)ro.observe(arcWrapEl);
   setInterval(update,1000);
 });
