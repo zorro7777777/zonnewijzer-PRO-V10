@@ -82,7 +82,7 @@ Bij lokaal gebruik: GPS-toestemming werkt op `localhost` zonder HTTPS.
 | Ontwerp & Opdrachtgever | Andy De Poortere |
 | AI-ontwikkeling | Claude Sonnet 4.6 (Anthropic) |
 
-**Versie:** 6.0  
+**Versie:** 10.0  
 **Datum:** mei 2026  
 **Status:** Productie — getest op Samsung Galaxy Z Flip 6
 
