@@ -1,4 +1,4 @@
-// Zonnewijzer Pro v6 — Hoofdscript
+// Zonnewijzer Pro v10 — Hoofdscript
 // Architectuur: Settings Store · Paginaregister · Router · Weergave
 
 // LAAG 0 - SETTINGS STORE
